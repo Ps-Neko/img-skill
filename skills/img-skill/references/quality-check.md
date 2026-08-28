@@ -62,3 +62,46 @@
 - [ ] **Low-evidence extension / 근거가 약한 확장 적용안** 템플릿을 사용했다면 확장 라벨이 최종 출력에도 보인다.
 
 최종 점검에서는 형식, 개수, 콜라주 상태, must-keep 요구와 모델 경계가 모두 보존되었는지 루브릭 점수와 별도로 다시 확인한다.
+
+## Reference-Image Preflight Gate
+
+참고 이미지를 사용하는 작업은 기존 100점 프롬프트 루브릭과 별도로 아래 항목을 모두 통과해야 한다. 하나라도 빠지면 점수와 관계없이 수정한다.
+
+- [ ] 모든 첨부물이 content source, style-layout target, generated result, region-mask 중 하나로 구분되어 있다.
+- [ ] content source가 정체성을 우선 통제하고, target이 source의 피사체를 대체하지 않는다.
+- [ ] preserve / transform / ignore 목록이 서로 섞이지 않는다.
+- [ ] 참고에 QR, 바코드, UI, 워터마크, 무관한 간판이나 작은 글자가 보이는 경우에만 옮길지 제거할지가 명시되어 있다.
+- [ ] 분할 구성을 사용하는 경우에만 비율의 합이 100%이며 경계 위치가 하나뿐이다.
+- [ ] `정확히`라고 쓴 화면비·비율·여백·경계 수치는 사용자 입력 또는 접근 가능한 파일·픽셀 측정에서 나온 값이며, 눈대중 값은 `약`으로 표시되어 있다.
+- [ ] 피사체 수, 구조 단계 수, 제목 줄 수와 보조 라벨 수가 필요한 경우 정확히 하나의 값으로 고정되고 사용자 입력·관찰한 개수·디자인 선택 중 출처가 구분되어 있다.
+- [ ] 타이포그래피를 사용하는 경우에만 제목 앵커, 정렬, 점유 면적과 보호 여백이 단일 geometry contract에 들어 있다.
+- [ ] 보이지 않는 재료·브랜드·내부 구조를 사실처럼 단정하지 않는다.
+- [ ] 생성 결과 비교라면 성공한 요소와 실패한 요소를 분리하고 실패 블록만 수정한다.
+
+## Optional Visual Fidelity Rubric
+
+사용자가 생성 결과와 참고 또는 타깃을 함께 제공하고 비교를 요청한 경우에만 사용한다. 이 점수는 프롬프트 품질 점수와 별개이며, 모델 성능 보증으로 표현하지 않는다.
+
+채점 전에 preserve / transform / ignore 계약을 기준으로 적용 항목을 선택한다. 요청에서 사용하지 않는 항목은 0점 처리하지 말고 `N/A`로 표시한 뒤, 적용 가능한 항목의 점수만 100점으로 재정규화한다. 예를 들어 no-text 작업의 타이포그래피, 배경 변경이 허용된 작업의 원본 배경색, 조명 변경이 허용된 작업의 원본 빛은 보존도 감점 대상이 아니다.
+
+### A. Target Design Reproduction — 100 points
+
+| Criterion | Maximum | Apply when |
+| --- | ---: | --- |
+| Layout and geometry contract | 25 | target or user controls layout |
+| Semantic composition and subject relationships | 20 | target controls composition |
+| Medium and material treatment | 20 | medium or material transfer is requested |
+| Palette, light, and finish | 20 | target controls any of these fields |
+| Typography and information hierarchy | 15 | requested text exists, or target typography is explicitly authorized under transform; always N/A for a no-text contract even if the target contains type |
+
+### B. Content-Source Preservation — 100 points
+
+| Criterion | Maximum | Apply when |
+| --- | ---: | --- |
+| Subject identity and required subject count | 30 | always for a content source |
+| Pose, proportions, orientation, and viewpoint | 25 | listed under preserve |
+| Required subject/background relationships | 20 | listed under preserve |
+| Protected visible color, material, logo, or text | 15 | explicitly listed under preserve |
+| Distortion, omission, and unsupported-invention suppression | 10 | always for a content source |
+
+각 축은 기본적으로 따로 보고한다. 사용자가 종합점수를 명시적으로 요구한 경우에만 가중치를 먼저 공개한 뒤 계산한다. 그 경우에도 **모든 명시적 must-keep 항목**(예: 정체성, 피사체 수, 포즈, 관찰 방향, 로고, 정확한 문구, 색 배치, 출력 기하)의 실패 또는 명시적 금지 요소의 생성은 평균으로 상쇄하지 않고 별도의 **FAIL gate**로 표시한다. 평가자는 적용/비적용 판정, 항목별 가시적 근거, 가장 큰 차이와 신뢰도를 함께 기록한다. 원본 파일을 확인할 수 없거나 시각 추정만 가능한 값은 신뢰도를 낮춘다.

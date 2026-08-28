@@ -72,6 +72,49 @@
 출력은 [aspect ratio/output contract]. [targeted negatives limited to likely failure modes]만 금지한다.
 ```
 
+## Reference-Image Transformation Template — strong within one repeated subtype, 13/54
+
+**Account-observed pattern / 계정 관찰 패턴 — strong within one repeated subtype, 13/54:** 후기 사진 변환 계열에서 반복된 출력 계약과 보존 우선 구조를 일반화한 뼈대다. 13개는 서로 독립적인 유형이 아니라 한 계열의 변형이므로 계정 전체의 범용 공식으로 취급하지 않는다. 상세 규칙은 [reference-image-fidelity.md](reference-image-fidelity.md)를 따른다.
+
+```text
+이미지 역할: content source=[identity source], style/layout target=[optional target], generated result=[optional result]. content source가 정체성을 우선 통제한다.
+기하 계약: [count], [aspect ratio], [independent output/no collage], [regions/order/orientation/percentages totaling 100%], [subject count and placement], [boundary], [layer/component count], [negative-space area], [title anchor/alignment/max lines/occupied area], [label count]. 각 값은 사용자 입력·측정·관찰한 이산 개수·디자인 선택 중 출처를 밝히며 이 블록 밖에서 수치로 반복하지 않는다.
+보존: [identity, subject count, silhouette, pose, proportions, viewpoint, perspective, visible color placement, decisive relationships].
+허용된 변형: [authorized region/background/medium/layout treatment]만 바꾼다.
+무시/제거: [incidental QR/barcode/UI/watermark/signage/stray text/unrelated objects]는 사용자가 요구하지 않는 한 옮기지 않는다.
+구성: 수치 계약을 바꾸지 않는 범위에서 [qualitative hierarchy, rhythm, and information density].
+표현: [medium and making actions]. 색은 [palette roles and qualitative dominance].
+타이포그래피: [exact wording/language and type style] 또는 [text-free safe area for post-production]. 위치·줄 수·점유 면적은 기하 계약을 따른다.
+마감: [material/light/surface/rendering].
+제한과 검증: [likely failures only]. 출력에서 identity, geometry, typography hierarchy, incidental artifacts, and exact counts를 확인한다.
+```
+
+### Split Photo + Layered Paper Editorial Profile — internal-observation narrow profile
+
+**Internal one-run observation / 내부 1회 관찰 — two non-blind trials:** 종이공예 사례 두 개에서 디자인 계열과 참고사진 보존은 높았지만, 제목 과대화·여백 감소·QR 재사용이 반복 위험으로 확인되었다. [검증 기록과 한계](reference-fidelity-validation-ko.md)를 함께 보며, 아래 값은 타깃 또는 사용자가 같은 구조를 요구할 때만 사용한다.
+
+```text
+기하 계약: 3:4 세로 포스터 한 장, 위 50% 사진/아래 50% 종이공예, 화면 중앙의 수평 경계 하나, [subject count and placement], [exact or deliberately unspecified layer count], [negative-space side and share], 제목 [anchor/max lines/occupied share], 보조 라벨 [count]. 이 구조가 사용자 입력이나 측정된 타깃과 일치할 때만 정확값으로 사용하고 다른 블록에서 반복하지 않는다.
+보존: content source의 정체성·피사체 수·포즈·시점·배경 관계를 유지한다.
+변형: 아래 영역만 [paper medium]으로 재구성하고 [decisive narrative relationship]을 유지한다.
+색은 source에서 [palette roles]로 제한해 추출한다. [paper fibers/cut edges/fold thickness/contact shadows]를 보이게 한다.
+제목 문구는 정확히 [text]이며, 서체 위계와 정렬은 기하 계약을 따른다.
+source에 우연히 보이는 QR·바코드·간판 글자·UI·워터마크는 아래 영역에 재사용하지 않는다. 임의 장식, 반복 피사체, 과밀 구성, 추가 제목을 만들지 않는다.
+```
+
+### Split Photo + Structural Watercolor Study Profile — internal-observation narrow profile
+
+**Internal one-run observation / 내부 1회 관찰 — one non-blind trial:** 구조 분해 사례 한 개에서 정체성과 재질 계열은 높게 보존됐지만 목표보다 구조 단계가 하나 늘어났다. [검증 기록과 한계](reference-fidelity-validation-ko.md)를 함께 보며, 다음 뼈대는 정확한 단계 수와 근거 없는 내부 구조를 통제한다.
+
+```text
+기하 계약: [aspect ratio] 세로 포스터 한 장, 위 [upper ratio]% source/아래 [lower ratio]% structural study, 합계 100%, 경계 하나, 정확히 [component count]단계, 제목 [anchor/max lines/occupied share], 주석 [count/alignment]. 연속 수치는 사용자 입력 또는 픽셀 측정일 때만 정확값으로 쓰고 다른 블록에서 반복하지 않는다.
+보존: content source의 정체성, 전체 비율, 관찰 방향, 결정적 외형과 visible color placement를 유지한다.
+변형: 아래 영역만 [isometric/structural watercolor study]로 재구성한다. 허용 단계는 [named visible or user-confirmed components]이며 [stable anchor/base]를 유지하고 동일한 축을 따라 절제된 간격으로 분리한다.
+보이지 않거나 사용자가 확인하지 않은 내부 구조는 사실처럼 발명하거나 라벨링하지 않는다.
+제목 문구는 정확히 [exact text]이며, 서체 위계와 배치는 기하 계약을 따른다. [watercolor paper/linework/transparent wash/construction guides]로 마감한다.
+추가 구조 단계, 과장된 폭발, 임의 기계 부품, 기술 UI, 가짜 브랜드·연도·QR·바코드·중복 제목을 만들지 않는다.
+```
+
 아래 세 유형은 모두 강한 계정별 표본을 벗어난다. **Low-evidence extension / 근거가 약한 확장 적용안:** 프로젝트의 핵심 문법을 확장한 것이며, 확립된 계정 패턴이나 공식 방법이 아니다.
 
 ## Portrait or Fashion Template — extension, one close-read sample
