@@ -1,5 +1,7 @@
 # img-skill
 
+[![Validate img-skill](https://github.com/Ps-Neko/img-skill/actions/workflows/validate.yml/badge.svg)](https://github.com/Ps-Neko/img-skill/actions/workflows/validate.yml)
+
 ## What it does
 
 짧은 아이디어를 이미지 생성 도구에 전달하기 좋은 구조화된 프롬프트로 바꿔 주는 Codex 스킬입니다. 요청이 구체적이면 추천 방향 하나를, 여러 해석이 가능한 요청이면 서로 뚜렷하게 다른 방향 네 가지를 제안합니다. 참고 이미지가 있으면 각 이미지의 역할과 보존·변형·무시 대상을 분리하며, 목표와 생성 결과를 함께 주면 보이는 차이를 바탕으로 수정 프롬프트를 만듭니다. 이 스킬 자체가 이미지를 만들거나 편집하지는 않습니다.
@@ -56,6 +58,19 @@ $img-skill 제주도 작은 카페를 홍보하는 세로 포스터
 
 참고 이미지 작업에서는 content source가 피사체 정체성을 통제하고 style/layout target은 관찰 가능한 스타일과 배치만 통제합니다. 우연히 찍힌 QR·바코드·UI·워터마크·무관한 간판 글자는 사용자가 요구하지 않는 한 새 디자인으로 옮기지 않습니다. 사용자가 지정한 분할 비율, 구조 단계 수, 제목 위치·줄 수·점유 면적과 여백은 한 번만 명확하게 고정합니다. 정확한 글자나 제작용 편집 정밀도가 필요한 경우에는 후처리 대안도 함께 안내합니다.
 
+## Automated validation
+
+저장소 루트에서 다음 명령으로 GitHub와 동일한 자동 검사를 실행할 수 있습니다.
+
+```text
+python scripts/validate.py
+python -m unittest discover -s tests -v
+```
+
+검사기는 필수 파일, 스킬 이름과 UI 정보의 일치, 상대 링크, 설치 후에도 유지되는 내부 링크, 개인 컴퓨터 경로 노출, Markdown 구조, 평가 사례 번호와 필수 항목, 참고 문서 연결, GitHub Actions 구성을 확인합니다. 외부 Python 패키지는 사용하지 않습니다.
+
+GitHub Actions는 pull request, `main` 푸시, 수동 실행에서 이 두 명령을 자동으로 수행합니다. 실제 이미지의 정체성·구도·타이포그래피 유사도는 참고 이미지와 생성 모델이 필요하므로 자동 점수로 가장하지 않습니다. Cases 8–11은 [평가 사례](evals/test-cases.md)에 따른 **수동 시각 검증** 단계이며, 필요한 X 이미지에 접근할 수 없으면 실패가 아니라 `BLOCKED — fixture unavailable`로 기록합니다.
+
 ## Update or remove
 
 **업데이트:** 먼저 Codex에 로컬에 설치된 `img-skill`을 제거해 달라고 요청한 뒤, 위의 설치 요청을 그대로 다시 전송하세요. 설치 도구는 기존 스킬을 덮어쓰지 않고 의도적으로 중단합니다. 로컬 스킬의 위치를 모른다면 Codex에 기존 `img-skill`을 먼저 제거해 달라고 한 다음 같은 설치 요청을 다시 붙여 넣으면 됩니다.
@@ -69,6 +84,8 @@ $img-skill 제주도 작은 카페를 홍보하는 세로 포스터
 - [`docs/research-report-ko.md`](docs/research-report-ko.md): 방법론, 공개 근거, 한계를 담은 한국어 연구 보고서
 - [`skills/img-skill/references/reference-fidelity-validation-ko.md`](skills/img-skill/references/reference-fidelity-validation-ko.md): 참고 이미지 3회 내부 관찰의 직접 출처, 해시, 점수와 한계
 - [`evals/test-cases.md`](evals/test-cases.md): 스킬의 동작을 확인하는 평가 사례
+- [`scripts/validate.py`](scripts/validate.py): 외부 패키지 없이 실행되는 저장소 자동 검사기
+- [`.github/workflows/validate.yml`](.github/workflows/validate.yml): pull request와 `main` 푸시에서 자동 검증을 실행하는 GitHub Actions
 
 원시 연구 데이터, 수집 자료, 자격 증명은 의도적으로 공개 저장소에서 제외합니다.
 
