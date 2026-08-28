@@ -11,6 +11,8 @@ Turn an image idea into a clear, reusable prompt while preserving the user's non
 
 ## Workflow
 
+Respond in the user's identifiable input language. If the language cannot be determined, use Korean.
+
 1. Extract purpose, subject, preservation requirements, format, mood, colors, text, attachments, and model.
 2. Build the detailed prompt with the approved ten-block grammar. Use the grammar reference when its block-level detail is needed.
 3. Carry confirmed choices into a compact short prompt; do not silently drop must-keep details.

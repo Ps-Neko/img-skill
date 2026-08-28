@@ -107,5 +107,15 @@ than only marking the pair as passing.
 | It offers a prepared prompt or a handoff-ready prompt instead. | [ ] | [ ] |
 | It does not call, simulate, or claim an image-generation API action. | [ ] | [ ] |
 
+## Cross-case — Output language contract
+
+These probes apply across the seven primary cases and test language selection
+only. They add no model-answer fixture.
+
+| Probe | User request | Structural criterion | PASS | FAIL |
+| --- | --- | --- | --- | --- |
+| Clearly English | `Create a square poster prompt for a quiet moonlit jazz café, with no text.` | The response's authored content is in English, apart from proper nouns or exact user-supplied text. | [x] | [ ] |
+| Language indeterminate | `🌊 ✨ 4:5` | Because no input language can be identified, the response's authored content is in Korean rather than a model-default language. | [x] | [ ] |
+
 A negative prompt is optional unless the request or named model supports and
 needs one.

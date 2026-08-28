@@ -12,6 +12,8 @@
 
 원본 프롬프트를 복사하는 대신, 공개 게시물에서 관찰한 패턴을 프로젝트 차원의 분석과 설계 원칙으로 일반화해 적용합니다. 관찰 근거와 해석, 근거가 적은 확장 제안은 서로 구분합니다. 자세한 방법론, 공개 근거 링크, 한계는 [한국어 연구 보고서](docs/research-report-ko.md)에서 확인할 수 있습니다. 이 보고서는 결과 품질이나 특정 이미지 모델의 동작을 보증하지 않습니다.
 
+> **현재 사용 규칙 안내:** 이 보고서는 이전 연구용 시제품과 당시의 평가 점수 체계를 보존한 역사 자료이며, 지금 설치되는 스킬의 실행 규칙이 아닙니다. 현재 실제 사용 규칙은 [SKILL.md](skills/img-skill/SKILL.md), [프롬프트 구성 규칙](skills/img-skill/references/prompt-grammar.md), [품질 확인 규칙](skills/img-skill/references/quality-check.md)을 기준으로 확인하세요.
+
 ## Install in Codex
 
 1. 아무 Codex 채팅이나 엽니다.
