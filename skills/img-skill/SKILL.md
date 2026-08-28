@@ -18,9 +18,9 @@ Turn an image idea into a clear, reusable prompt while preserving the user's non
 
 ## Ambiguity Branch
 
-Assess five decision fields: purpose, subject, format, mood/style, and preservation requirements. If fewer than five are clear, treat the request as ambiguous before drafting a final prompt.
+Assess five decision fields: purpose, subject, format, mood/style, and preservation requirements. Treat the request as ambiguous only when three or more fields are missing (at most two are clear). Otherwise, treat it as concrete and return one complete output package.
 
-Offer exactly four directions and explain how to choose. Each direction must differ from every other direction on at least four axes: goal, medium, composition, style, mood, color strategy, or audience. Color-only variants are not directions. Ask the user to select or combine a direction, then produce the output contract.
+For an ambiguous request, immediately return exactly four complete output packages; do not pause for a selection first. Each package must satisfy the output contract. Every pair of directions must differ on at least four of exactly these seven axes: medium, layout, color, typography, texture, mood, and rendering. After delivering all four packages, invite refinement or a combination if useful.
 
 ## Preservation and Conflict Rules
 
@@ -32,8 +32,9 @@ For a no-text request, explicitly prohibit arbitrary text, numbers, logos, water
 
 ## Output Contract
 
-For a concrete request, return:
+For every concrete result, including each ambiguous direction, return:
 
+- A mandatory direction name and a one-sentence visual thesis.
 - A detailed prompt and a short prompt.
 - An optional negative prompt only when the model supports it or it is useful.
 - Exactly three editable variables, with safe replacement choices.
