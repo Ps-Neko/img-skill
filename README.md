@@ -16,7 +16,24 @@
 
 > **현재 사용 규칙 안내:** 이 보고서는 이전 연구용 시제품과 당시의 평가 점수 체계를 보존한 역사 자료이며, 지금 설치되는 스킬의 실행 규칙이 아닙니다. 현재 실제 사용 규칙은 [SKILL.md](skills/img-skill/SKILL.md), [프롬프트 구성 규칙](skills/img-skill/references/prompt-grammar.md), [참고 이미지 충실도 규칙](skills/img-skill/references/reference-image-fidelity.md), [품질 확인 규칙](skills/img-skill/references/quality-check.md)을 기준으로 확인하세요.
 
-## Install in Codex
+## 플러그인으로 설치 — 권장
+
+플러그인으로 설치하면 Codex의 플러그인 목록에서 `Image Prompt Designer`로 확인할 수 있습니다. 처음 한 번만 터미널에서 아래 두 명령을 차례로 실행하세요.
+
+```text
+codex plugin marketplace add Ps-Neko/img-skill --ref main
+codex plugin add img-skill@ps-neko
+```
+
+설치가 끝나면 **새 채팅**을 열고 다음과 같이 사용합니다.
+
+```text
+$img-skill 제주도 작은 카페를 홍보하는 따뜻한 세로 포스터
+```
+
+플러그인 식별자는 `img-skill`, 화면에 보이는 이름은 `Image Prompt Designer`, 배포 목록 이름은 `ps-neko`입니다. 플러그인화해도 이 프로젝트의 역할은 이미지 직접 생성이 아니라 이미지 생성 프롬프트 설계입니다.
+
+## 스킬만 설치 — 기존 방식
 
 1. 아무 Codex 채팅이나 엽니다.
 2. 아래 요청을 그대로 붙여 넣고 전송합니다.
@@ -67,11 +84,20 @@ python scripts/validate.py
 python -m unittest discover -s tests -v
 ```
 
-검사기는 필수 파일, 스킬 이름과 UI 정보의 일치, 상대 링크, 설치 후에도 유지되는 내부 링크, 개인 컴퓨터 경로 노출, Markdown 구조, 평가 사례 번호와 필수 항목, 참고 문서 연결, GitHub Actions 구성을 확인합니다. 외부 Python 패키지는 사용하지 않습니다.
+검사기는 필수 파일, 스킬 이름과 UI 정보의 일치, 플러그인 매니페스트, GitHub 배포 목록, 독립 설치용 스킬과 플러그인에 포함된 스킬의 일치 여부, 상대 링크, 개인 컴퓨터 경로 노출, Markdown 구조, 평가 사례와 GitHub Actions 구성을 확인합니다. 외부 Python 패키지는 사용하지 않습니다.
 
 GitHub Actions는 pull request, `main` 푸시, 수동 실행에서 이 두 명령을 자동으로 수행합니다. 실제 이미지의 정체성·구도·타이포그래피 유사도는 참고 이미지와 생성 모델이 필요하므로 자동 점수로 가장하지 않습니다. Cases 8–11은 [평가 사례](evals/test-cases.md)에 따른 **수동 시각 검증** 단계이며, 필요한 X 이미지에 접근할 수 없으면 실패가 아니라 `BLOCKED — fixture unavailable`로 기록합니다.
 
 ## Update or remove
+
+**플러그인 업데이트:** 등록된 GitHub 배포 목록과 플러그인을 갱신합니다.
+
+```text
+codex plugin marketplace upgrade ps-neko
+codex plugin add img-skill@ps-neko
+```
+
+업데이트 후에는 새 채팅을 시작하세요.
 
 **업데이트:** 먼저 Codex에 로컬에 설치된 `img-skill`을 제거해 달라고 요청한 뒤, 위의 설치 요청을 그대로 다시 전송하세요. 설치 도구는 기존 스킬을 덮어쓰지 않고 의도적으로 중단합니다. 로컬 스킬의 위치를 모른다면 Codex에 기존 `img-skill`을 먼저 제거해 달라고 한 다음 같은 설치 요청을 다시 붙여 넣으면 됩니다.
 
@@ -79,6 +105,8 @@ GitHub Actions는 pull request, `main` 푸시, 수동 실행에서 이 두 명�
 
 ## Repository contents
 
+- [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json): GitHub에서 플러그인을 찾을 수 있게 하는 배포 목록
+- [`plugins/img-skill/`](plugins/img-skill/): Codex 플러그인 패키지
 - [`skills/img-skill/`](skills/img-skill/): 설치 가능한 스킬 본체
 - [`skills/img-skill/references/`](skills/img-skill/references/): 프롬프트 구성과 품질 확인에 사용하는 참고 지침
 - [`docs/research-report-ko.md`](docs/research-report-ko.md): 방법론, 공개 근거, 한계를 담은 한국어 연구 보고서

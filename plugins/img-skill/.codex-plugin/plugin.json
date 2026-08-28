@@ -1,0 +1,37 @@
+{
+  "name": "img-skill",
+  "version": "1.0.0",
+  "description": "Turn image ideas and reference-image goals into structured generation prompts.",
+  "author": {
+    "name": "Ps-Neko",
+    "url": "https://github.com/Ps-Neko"
+  },
+  "homepage": "https://github.com/Ps-Neko/img-skill#readme",
+  "repository": "https://github.com/Ps-Neko/img-skill",
+  "license": "MIT",
+  "keywords": [
+    "image-prompt",
+    "prompt-design",
+    "reference-image",
+    "visual-design"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Image Prompt Designer",
+    "shortDescription": "짧은 아이디어를 구조화된 이미지 생성 프롬프트로 확장합니다.",
+    "longDescription": "이미지 목적, 피사체, 구도, 색상, 조명과 참고 이미지의 보존·변형 조건을 정리해 상세·짧은 이미지 생성 프롬프트를 만듭니다.",
+    "developerName": "Ps-Neko",
+    "category": "Creativity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/Ps-Neko/img-skill",
+    "brandColor": "#6E56CF",
+    "defaultPrompt": [
+      "제주도 작은 카페를 홍보하는 따뜻한 세로 포스터 프롬프트를 만들어줘.",
+      "첨부 제품의 형태와 색은 유지하고 배경만 고급 광고처럼 바꿔줘.",
+      "원본·목표·생성 결과를 비교해 실패한 부분만 수정하는 프롬프트를 만들어줘."
+    ]
+  }
+}

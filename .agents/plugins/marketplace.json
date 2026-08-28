@@ -1,0 +1,20 @@
+{
+  "name": "ps-neko",
+  "interface": {
+    "displayName": "Ps Neko"
+  },
+  "plugins": [
+    {
+      "name": "img-skill",
+      "source": {
+        "source": "local",
+        "path": "./plugins/img-skill"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Creativity"
+    }
+  ]
+}

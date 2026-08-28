@@ -209,6 +209,80 @@ class RepositoryValidationTests(unittest.TestCase):
         self.assertEqual("required", report["manual_visual_validation"]["status"])
         self.assertEqual([8, 9, 10, 11], report["manual_visual_validation"]["cases"])
 
+    def test_plugin_manifest_is_required_and_validated(self) -> None:
+        results = {result.check_id: result for result in validate_repository(REPO_ROOT)}
+
+        self.assertIn("PLUGIN_MANIFEST", results)
+        self.assertTrue(
+            results["PLUGIN_MANIFEST"].passed,
+            results["PLUGIN_MANIFEST"].details,
+        )
+
+        root = self.copy_repository()
+        manifest = root / "plugins/img-skill/.codex-plugin/plugin.json"
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+        payload["name"] = "different-plugin"
+        manifest.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+
+        self.assertCheckFails(root, "PLUGIN_MANIFEST")
+
+    def test_marketplace_entry_points_to_packaged_plugin(self) -> None:
+        results = {result.check_id: result for result in validate_repository(REPO_ROOT)}
+
+        self.assertIn("PLUGIN_MARKETPLACE", results)
+        self.assertTrue(
+            results["PLUGIN_MARKETPLACE"].passed,
+            results["PLUGIN_MARKETPLACE"].details,
+        )
+
+        root = self.copy_repository()
+        marketplace = root / ".agents/plugins/marketplace.json"
+        payload = json.loads(marketplace.read_text(encoding="utf-8"))
+        payload["plugins"][0]["source"]["path"] = "./plugins/missing"
+        marketplace.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+
+        self.assertCheckFails(root, "PLUGIN_MARKETPLACE")
+
+    def test_packaged_skill_must_match_standalone_skill(self) -> None:
+        results = {result.check_id: result for result in validate_repository(REPO_ROOT)}
+
+        self.assertIn("PLUGIN_SKILL_MIRROR", results)
+        self.assertTrue(
+            results["PLUGIN_SKILL_MIRROR"].passed,
+            results["PLUGIN_SKILL_MIRROR"].details,
+        )
+
+        root = self.copy_repository()
+        packaged_skill = root / "plugins/img-skill/skills/img-skill/SKILL.md"
+        packaged_skill.write_text(
+            packaged_skill.read_text(encoding="utf-8") + "\nmirror drift\n",
+            encoding="utf-8",
+        )
+
+        self.assertCheckFails(root, "PLUGIN_SKILL_MIRROR")
+
+    def test_readme_documents_github_plugin_installation(self) -> None:
+        results = {result.check_id: result for result in validate_repository(REPO_ROOT)}
+
+        self.assertIn("PLUGIN_DOCS", results)
+        self.assertTrue(results["PLUGIN_DOCS"].passed, results["PLUGIN_DOCS"].details)
+
+        root = self.copy_repository()
+        readme = root / "README.md"
+        readme.write_text(
+            readme.read_text(encoding="utf-8").replace(
+                "codex plugin add img-skill@ps-neko",
+                "install the plugin",
+            ),
+            encoding="utf-8",
+        )
+
+        self.assertCheckFails(root, "PLUGIN_DOCS")
+
 
 if __name__ == "__main__":
     unittest.main()

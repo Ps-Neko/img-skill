@@ -13,10 +13,13 @@ from urllib.parse import unquote
 
 
 REQUIRED_FILES = (
+    ".agents/plugins/marketplace.json",
     ".github/workflows/validate.yml",
     "LICENSE",
     "README.md",
     "evals/test-cases.md",
+    "plugins/img-skill/.codex-plugin/plugin.json",
+    "plugins/img-skill/skills/img-skill/SKILL.md",
     "scripts/validate.py",
     "tests/test_validate.py",
     "skills/img-skill/SKILL.md",
@@ -37,6 +40,11 @@ LOCAL_PATH_PATTERNS = (
 )
 LOCAL_URI_MARKER = "file:" + "//"
 TODO_MARKER = "[TODO" + ":"
+SEMVER_RE = re.compile(
+    r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
+    r"(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+    r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$"
+)
 
 
 @dataclass(frozen=True)
@@ -60,7 +68,7 @@ def _result(
 
 def _markdown_files(root: Path) -> list[Path]:
     files = [root / "README.md"]
-    for directory in ("docs", "evals", "skills"):
+    for directory in ("docs", "evals", "plugins", "skills"):
         path = root / directory
         if path.exists():
             files.extend(sorted(path.rglob("*.md")))
@@ -70,7 +78,16 @@ def _markdown_files(root: Path) -> list[Path]:
 def _repository_text_files(root: Path) -> list[Path]:
     files = [root / "README.md", root / "LICENSE", root / ".gitignore"]
     supported_suffixes = {".json", ".md", ".py", ".txt", ".yaml", ".yml"}
-    for directory in (".github", "docs", "evals", "scripts", "skills", "tests"):
+    for directory in (
+        ".agents",
+        ".github",
+        "docs",
+        "evals",
+        "plugins",
+        "scripts",
+        "skills",
+        "tests",
+    ):
         path = root / directory
         if not path.exists():
             continue
@@ -131,6 +148,31 @@ def _case_sections(text: str) -> dict[int, str]:
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
         sections[int(match.group(1))] = text[start:end]
     return sections
+
+
+def _load_json_object(path: Path, label: str, problems: list[str]) -> dict | None:
+    if not path.is_file():
+        problems.append(f"{label} is missing")
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        problems.append(f"{label} must contain valid JSON")
+        return None
+    if not isinstance(payload, dict):
+        problems.append(f"{label} must contain a JSON object")
+        return None
+    return payload
+
+
+def _file_tree(root: Path) -> dict[str, bytes]:
+    if not root.is_dir():
+        return {}
+    return {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in sorted(root.rglob("*"))
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+    }
 
 
 def validate_repository(root: Path) -> list[CheckResult]:
@@ -201,6 +243,153 @@ def validate_repository(root: Path) -> list[CheckResult]:
             "UI metadata matches the skill",
             metadata_problems,
             "display name and default prompt are consistent",
+        )
+    )
+
+    plugin_root = root / "plugins/img-skill"
+    plugin_manifest_path = plugin_root / ".codex-plugin/plugin.json"
+    manifest_problems: list[str] = []
+    manifest = _load_json_object(
+        plugin_manifest_path, "plugin manifest", manifest_problems
+    )
+    if manifest is not None:
+        if manifest.get("name") != "img-skill":
+            manifest_problems.append("plugin name must be img-skill")
+        if manifest.get("name") != plugin_root.name:
+            manifest_problems.append("plugin name must match the plugin folder")
+        version = manifest.get("version")
+        if not isinstance(version, str) or SEMVER_RE.fullmatch(version) is None:
+            manifest_problems.append("plugin version must use semantic versioning")
+        if (
+            not isinstance(manifest.get("description"), str)
+            or not manifest["description"].strip()
+        ):
+            manifest_problems.append("plugin description is required")
+        author = manifest.get("author")
+        if not isinstance(author, dict) or author.get("name") != "Ps-Neko":
+            manifest_problems.append("plugin author must be Ps-Neko")
+        if manifest.get("skills") != "./skills/":
+            manifest_problems.append("plugin skills path must be ./skills/")
+        for unsupported in ("apps", "hooks", "mcpServers"):
+            if unsupported in manifest:
+                manifest_problems.append(
+                    f"plugin manifest declares unsupported companion: {unsupported}"
+                )
+
+        interface = manifest.get("interface")
+        if not isinstance(interface, dict):
+            manifest_problems.append("plugin interface metadata is required")
+        else:
+            expected_interface = {
+                "displayName": "Image Prompt Designer",
+                "developerName": "Ps-Neko",
+                "category": "Creativity",
+            }
+            for field, expected_value in expected_interface.items():
+                if interface.get(field) != expected_value:
+                    manifest_problems.append(f"interface.{field} must be {expected_value}")
+            for field in ("shortDescription", "longDescription"):
+                if (
+                    not isinstance(interface.get(field), str)
+                    or not interface[field].strip()
+                ):
+                    manifest_problems.append(f"interface.{field} is required")
+            capabilities = interface.get("capabilities")
+            if not isinstance(capabilities, list) or not capabilities or not all(
+                isinstance(value, str) and value.strip() for value in capabilities
+            ):
+                manifest_problems.append("interface.capabilities must contain strings")
+            prompts = interface.get("defaultPrompt")
+            if not isinstance(prompts, list) or not 1 <= len(prompts) <= 3:
+                manifest_problems.append(
+                    "interface.defaultPrompt must contain 1-3 prompts"
+                )
+            elif not all(
+                isinstance(prompt, str) and 0 < len(prompt) <= 128 for prompt in prompts
+            ):
+                manifest_problems.append(
+                    "each interface.defaultPrompt entry must be 1-128 characters"
+                )
+    results.append(
+        _result(
+            "PLUGIN_MANIFEST",
+            "Codex plugin manifest has valid identity and UI metadata",
+            manifest_problems,
+            "img-skill 1.0.0 is packaged as Image Prompt Designer",
+        )
+    )
+
+    marketplace_path = root / ".agents/plugins/marketplace.json"
+    marketplace_problems: list[str] = []
+    marketplace = _load_json_object(
+        marketplace_path, "marketplace manifest", marketplace_problems
+    )
+    if marketplace is not None:
+        if marketplace.get("name") != "ps-neko":
+            marketplace_problems.append("marketplace name must be ps-neko")
+        interface = marketplace.get("interface")
+        if not isinstance(interface, dict) or interface.get("displayName") != "Ps Neko":
+            marketplace_problems.append("marketplace display name must be Ps Neko")
+        plugins = marketplace.get("plugins")
+        if not isinstance(plugins, list):
+            marketplace_problems.append("marketplace plugins must be an array")
+        else:
+            entries = [entry for entry in plugins if isinstance(entry, dict)]
+            matches = [entry for entry in entries if entry.get("name") == "img-skill"]
+            if len(matches) != 1:
+                marketplace_problems.append(
+                    "marketplace must contain exactly one img-skill entry"
+                )
+            else:
+                entry = matches[0]
+                source = entry.get("source")
+                if source != {
+                    "source": "local",
+                    "path": "./plugins/img-skill",
+                }:
+                    marketplace_problems.append(
+                        "img-skill source must be ./plugins/img-skill"
+                    )
+                elif not (root / "plugins/img-skill").is_dir():
+                    marketplace_problems.append("packaged plugin directory is missing")
+                if entry.get("policy") != {
+                    "installation": "AVAILABLE",
+                    "authentication": "ON_INSTALL",
+                }:
+                    marketplace_problems.append("img-skill marketplace policy is invalid")
+                if entry.get("category") != "Creativity":
+                    marketplace_problems.append("img-skill category must be Creativity")
+    results.append(
+        _result(
+            "PLUGIN_MARKETPLACE",
+            "GitHub marketplace entry points to the packaged plugin",
+            marketplace_problems,
+            "ps-neko exposes ./plugins/img-skill as an available plugin",
+        )
+    )
+
+    standalone_skill_root = root / "skills/img-skill"
+    packaged_skill_root = plugin_root / "skills/img-skill"
+    mirror_problems: list[str] = []
+    standalone_files = _file_tree(standalone_skill_root)
+    packaged_files = _file_tree(packaged_skill_root)
+    if not standalone_files:
+        mirror_problems.append("standalone skill tree is missing")
+    if not packaged_files:
+        mirror_problems.append("packaged skill tree is missing")
+    for relative in sorted(set(standalone_files) - set(packaged_files)):
+        mirror_problems.append(f"packaged skill is missing {relative}")
+    for relative in sorted(set(packaged_files) - set(standalone_files)):
+        mirror_problems.append(f"packaged skill has unexpected {relative}")
+    for relative in sorted(set(standalone_files) & set(packaged_files)):
+        if standalone_files[relative] != packaged_files[relative]:
+            mirror_problems.append(f"packaged skill differs at {relative}")
+    results.append(
+        _result(
+            "PLUGIN_SKILL_MIRROR",
+            "plugin skill matches the standalone-install skill",
+            mirror_problems,
+            f"{len(standalone_files)} skill files are identical",
         )
     )
 
@@ -410,6 +599,28 @@ def validate_repository(root: Path) -> list[CheckResult]:
             "README documents automated and manual validation",
             docs_problems,
             "local commands and the manual visual boundary are documented",
+        )
+    )
+
+    plugin_docs_problems: list[str] = []
+    if readme_path.is_file():
+        readme = readme_path.read_text(encoding="utf-8")
+        for command in (
+            "codex plugin marketplace add Ps-Neko/img-skill --ref main",
+            "codex plugin add img-skill@ps-neko",
+        ):
+            if command not in readme:
+                plugin_docs_problems.append(f"README is missing: {command}")
+        if "새 채팅" not in readme:
+            plugin_docs_problems.append("README must tell users to start a new chat")
+    else:
+        plugin_docs_problems.append("README.md cannot be inspected")
+    results.append(
+        _result(
+            "PLUGIN_DOCS",
+            "README documents GitHub plugin installation",
+            plugin_docs_problems,
+            "marketplace registration, plugin install, and new-chat pickup are documented",
         )
     )
 
