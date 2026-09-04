@@ -1,6 +1,6 @@
 {
   "name": "img-skill",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Turn image ideas and reference-image goals into structured generation prompts.",
   "author": {
     "name": "Ps-Neko",

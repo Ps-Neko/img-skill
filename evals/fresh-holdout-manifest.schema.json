@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ps-Neko/img-skill/evals/fresh-holdout-manifest.schema.json",
+  "title": "img-skill fresh holdout manifest v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "study_id",
+    "status",
+    "overall_result",
+    "separation_from_tuning",
+    "protocol",
+    "cases"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": "2.0"},
+    "study_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["DRAFT", "READY", "BLOCKED", "COMPLETE"]},
+    "overall_result": {"enum": ["NOT_RUN", "PASS", "FAIL", "BLOCKED"]},
+    "blocking_reason": {"type": "string", "minLength": 1},
+    "separation_from_tuning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "legacy_tuning_case_ids",
+        "holdout_ids_disjoint",
+        "disjoint_dimensions",
+        "selection_locked_before_evaluation",
+        "legacy_fingerprint_review_status",
+        "legacy_fingerprint_reviewed_by",
+        "reviewed_at"
+      ],
+      "properties": {
+        "legacy_tuning_case_ids": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "holdout_ids_disjoint": {"const": true},
+        "disjoint_dimensions": {
+          "const": ["prompt", "source_url", "prompt_family", "attachment_sha256"]
+        },
+        "selection_locked_before_evaluation": {"type": "boolean"}
+        ,"legacy_fingerprint_review_status": {
+          "enum": ["NOT_REVIEWED", "REVIEWED_WITH_SOURCE_GAPS", "FULLY_VERIFIED"]
+        },
+        "legacy_fingerprint_reviewed_by": {"type": ["string", "null"]},
+        "reviewed_at": {"type": ["string", "null"]}
+      }
+    },
+    "protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "conditions",
+        "same_conditions_required",
+        "minimum_repetitions_per_condition",
+        "must_keep_failure_is_gate",
+        "scores_kept_separate",
+        "acceptance_criteria"
+      ],
+      "properties": {
+        "conditions": {"const": ["baseline", "skill", "source"]},
+        "same_conditions_required": {"const": true},
+        "minimum_repetitions_per_condition": {"type": "integer", "minimum": 4},
+        "must_keep_failure_is_gate": {"const": true},
+        "scores_kept_separate": {"const": true},
+        "acceptance_criteria": {
+          "const": {
+            "minimum_blind_evaluators": 2,
+            "skill_vs_baseline_min_delta": {
+              "structural_score": 5,
+              "image_similarity_score": 5
+            },
+            "skill_vs_source_noninferiority_margin": {
+              "structural_score": 5,
+              "image_similarity_score": 5
+            },
+            "must_keep_all_runs_pass": true,
+            "averaging_unit": "all_runs_per_condition"
+          }
+        }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/holdoutCase"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "DRAFT"}}, "required": ["status"]},
+      "then": {"properties": {"overall_result": {"const": "NOT_RUN"}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "READY"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "overall_result": {"const": "NOT_RUN"},
+          "cases": {
+            "minItems": 1,
+            "items": {"allOf": [{"$ref": "#/$defs/holdoutCase"}, {"properties": {"status": {"const": "READY"}}}]}
+          },
+          "separation_from_tuning": {
+            "properties": {
+              "selection_locked_before_evaluation": {"const": true},
+              "legacy_fingerprint_review_status": {"enum": ["REVIEWED_WITH_SOURCE_GAPS", "FULLY_VERIFIED"]},
+              "legacy_fingerprint_reviewed_by": {"type": "string", "minLength": 1},
+              "reviewed_at": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "BLOCKED"}}, "required": ["status"]},
+      "then": {
+        "required": ["blocking_reason"],
+        "properties": {"overall_result": {"const": "BLOCKED"}}
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "COMPLETE"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "overall_result": {"enum": ["PASS", "FAIL"]},
+          "cases": {
+            "minItems": 1,
+            "items": {
+              "allOf": [
+                {"$ref": "#/$defs/holdoutCase"},
+                {"required": ["results"], "properties": {"status": {"const": "COMPLETE"}}}
+              ]
+            }
+          },
+          "separation_from_tuning": {
+            "properties": {
+              "selection_locked_before_evaluation": {"const": true},
+              "legacy_fingerprint_review_status": {"enum": ["REVIEWED_WITH_SOURCE_GAPS", "FULLY_VERIFIED"]},
+              "legacy_fingerprint_reviewed_by": {"type": "string", "minLength": 1},
+              "reviewed_at": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "evaluator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evaluator_id", "blind"],
+      "properties": {
+        "evaluator_id": {"type": "string", "minLength": 1},
+        "blind": {"type": "boolean"}
+      }
+    },
+    "mustKeepAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["criterion_id", "passed", "evidence"],
+      "properties": {
+        "criterion_id": {"type": "string", "minLength": 1},
+        "passed": {"type": "boolean"},
+        "evidence": {"type": "string", "minLength": 1}
+      }
+    },
+    "evaluatorScore": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evaluator_id", "structural_score", "image_similarity_score", "must_keep_assessments"],
+      "properties": {
+        "evaluator_id": {"type": "string", "minLength": 1},
+        "structural_score": {"type": "number", "minimum": 0, "maximum": 100},
+        "image_similarity_score": {"type": "number", "minimum": 0, "maximum": 100},
+        "must_keep_assessments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/mustKeepAssessment"}
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "seed",
+        "generated_artifact_sha256",
+        "generated_artifact_uri",
+        "evaluator_scores",
+        "must_keep_gate_pass"
+      ],
+      "properties": {
+        "run_id": {"type": "string", "minLength": 1},
+        "seed": {"type": ["integer", "string", "null"]},
+        "generated_artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "generated_artifact_uri": {"type": "string", "minLength": 1},
+        "evaluator_scores": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/evaluatorScore"}
+        },
+        "must_keep_gate_pass": {"type": "boolean"}
+      }
+    },
+    "conditionResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "runs"],
+      "oneOf": [
+        {"required": ["prompt"], "not": {"required": ["prompt_sha256"]}},
+        {"required": ["prompt_sha256"], "not": {"required": ["prompt"]}}
+      ],
+      "properties": {
+        "name": {"enum": ["baseline", "skill", "source"]},
+        "prompt": {"type": "string", "minLength": 1},
+        "prompt_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "runs": {
+          "type": "array",
+          "minItems": 4,
+          "items": {"$ref": "#/$defs/run"}
+        }
+      }
+    },
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["executed_at", "conditions", "comparison_summary"],
+      "properties": {
+        "executed_at": {"type": "string", "minLength": 1},
+        "conditions": {
+          "type": "array",
+          "prefixItems": [
+            {"allOf": [{"$ref": "#/$defs/conditionResult"}, {"properties": {"name": {"const": "baseline"}}}]},
+            {"allOf": [{"$ref": "#/$defs/conditionResult"}, {"properties": {"name": {"const": "skill"}}}]},
+            {"allOf": [{"$ref": "#/$defs/conditionResult"}, {"properties": {"name": {"const": "source"}}}]}
+          ],
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "comparison_summary": {"type": "string", "minLength": 1}
+      }
+    },
+    "holdoutCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "holdout_id",
+        "status",
+        "source_url",
+        "source_date",
+        "prompt_family",
+        "attachment_sha256",
+        "model",
+        "run_plan",
+        "shared_generation_settings",
+        "evaluators",
+        "must_keep_criteria",
+        "conditions",
+        "overall_result"
+      ],
+      "properties": {
+        "holdout_id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["DRAFT", "READY", "BLOCKED", "COMPLETE"]},
+        "source_url": {"type": "string", "format": "uri", "minLength": 1},
+        "source_date": {"type": "string", "format": "date"},
+        "prompt_family": {"type": "string", "minLength": 1},
+        "attachment_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "model": {"type": "string", "minLength": 1},
+        "run_plan": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repetitions", "seeds"],
+          "properties": {
+            "repetitions": {"type": "integer", "minimum": 4},
+            "seeds": {"type": "array", "items": {"type": ["integer", "string"]}}
+          }
+        },
+        "shared_generation_settings": {
+          "type": "object",
+          "minProperties": 1
+        },
+        "evaluators": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/evaluator"}
+        },
+        "must_keep_criteria": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "conditions": {"const": ["baseline", "skill", "source"]},
+        "overall_result": {"enum": ["NOT_RUN", "PASS", "FAIL", "BLOCKED"]},
+        "blocking_reason": {"type": "string", "minLength": 1},
+        "results": {"$ref": "#/$defs/results"}
+      }
+    }
+  }
+}

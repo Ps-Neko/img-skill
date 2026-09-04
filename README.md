@@ -12,7 +12,7 @@
 
 이 프로젝트는 `@xiaoxiaodong01`의 공개 게시물에서 관찰한 패턴을 바탕으로 독립적으로 재구성한 것이며, 공식 도구도 계정 소유자가 보증하거나 승인한 방법도 아닙니다.
 
-원본 프롬프트를 복사하는 대신, 공개 게시물에서 관찰한 패턴을 프로젝트 차원의 분석과 설계 원칙으로 일반화해 적용합니다. 관찰 근거와 해석, 근거가 적은 확장 제안은 서로 구분합니다. 자세한 방법론, 공개 근거 링크, 한계는 [한국어 연구 보고서](docs/research-report-ko.md)에서 확인할 수 있습니다. 이 보고서는 결과 품질이나 특정 이미지 모델의 동작을 보증하지 않습니다.
+원본 프롬프트를 복사하는 대신, 공개 게시물에서 관찰한 패턴을 프로젝트 차원의 분석과 설계 원칙으로 일반화해 적용합니다. 관찰 근거와 해석, 근거가 적은 확장 제안은 서로 구분합니다. v2 교정에서는 인용 게시물의 이미지 ALT를 실제 원 게시물로 재귀속하고 KST 날짜를 다시 계산했으며, 54개 프롬프트와 42개 독립 계열을 함께 표시했습니다. 참고사진 보존 우선 구조는 후기 13개 변형·한 계열의 좁은 근거이지 계정 전체의 보편 법칙이 아닙니다. 자세한 방법론, 공개 근거 링크, 한계는 [한국어 연구 보고서](docs/research-report-ko.md)에서 확인할 수 있습니다. 이 보고서는 결과 품질이나 특정 이미지 모델의 동작을 보증하지 않습니다.
 
 > **현재 사용 규칙 안내:** 이 보고서는 이전 연구용 시제품과 당시의 평가 점수 체계를 보존한 역사 자료이며, 지금 설치되는 스킬의 실행 규칙이 아닙니다. 현재 실제 사용 규칙은 [SKILL.md](skills/img-skill/SKILL.md), [프롬프트 구성 규칙](skills/img-skill/references/prompt-grammar.md), [참고 이미지 충실도 규칙](skills/img-skill/references/reference-image-fidelity.md), [품질 확인 규칙](skills/img-skill/references/quality-check.md)을 기준으로 확인하세요.
 
@@ -84,9 +84,9 @@ python scripts/validate.py
 python -m unittest discover -s tests -v
 ```
 
-검사기는 필수 파일, 스킬 이름과 UI 정보의 일치, 플러그인 매니페스트, GitHub 배포 목록, 독립 설치용 스킬과 플러그인에 포함된 스킬의 일치 여부, 상대 링크, 개인 컴퓨터 경로 노출, Markdown 구조, 평가 사례와 GitHub Actions 구성을 확인합니다. 외부 Python 패키지는 사용하지 않습니다.
+검사기는 필수 파일, 스킬 이름과 UI 정보의 일치, 플러그인 매니페스트, GitHub 배포 목록, 독립 설치용 스킬과 플러그인에 포함된 스킬의 일치 여부, 상대 링크, 개인 컴퓨터 경로 노출, Markdown 구조, 평가 사례, 신규 홀드아웃 상태와 GitHub Actions 구성을 확인합니다. 외부 Python 패키지는 사용하지 않습니다.
 
-GitHub Actions는 pull request, `main` 푸시, 수동 실행에서 이 두 명령을 자동으로 수행합니다. 실제 이미지의 정체성·구도·타이포그래피 유사도는 참고 이미지와 생성 모델이 필요하므로 자동 점수로 가장하지 않습니다. Cases 8–11은 [평가 사례](evals/test-cases.md)에 따른 **수동 시각 검증** 단계이며, 필요한 X 이미지에 접근할 수 없으면 실패가 아니라 `BLOCKED — fixture unavailable`로 기록합니다.
+GitHub Actions는 pull request, `main` 푸시, 수동 실행에서 이 두 명령을 자동으로 수행합니다. 실제 이미지의 정체성·구도·타이포그래피 유사도는 참고 이미지와 생성 모델이 필요하므로 자동 점수로 가장하지 않습니다. Cases 8–11은 [평가 사례](evals/test-cases.md)에 따른 **수동 시각 검증** 단계이며, 필요한 X 이미지에 접근할 수 없으면 실패가 아니라 `BLOCKED — fixture unavailable`로 기록합니다. 신규 검증은 [홀드아웃 프로토콜](evals/fresh-holdout-protocol.md)과 [상태 원장](evals/fresh-holdout-manifest.json)을 사용합니다. `DRAFT`나 `READY`는 통과가 아니며, baseline·skill·source를 같은 조건에서 각각 4회 이상 생성하고 맹검 평가 증거를 기록한 `COMPLETE`만 PASS/FAIL을 낼 수 있습니다.
 
 ## Update or remove
 
@@ -112,6 +112,9 @@ codex plugin add img-skill@ps-neko
 - [`docs/research-report-ko.md`](docs/research-report-ko.md): 방법론, 공개 근거, 한계를 담은 한국어 연구 보고서
 - [`skills/img-skill/references/reference-fidelity-validation-ko.md`](skills/img-skill/references/reference-fidelity-validation-ko.md): 참고 이미지 3회 내부 관찰의 직접 출처, 해시, 점수와 한계
 - [`evals/test-cases.md`](evals/test-cases.md): 스킬의 동작을 확인하는 평가 사례
+- [`evals/fresh-holdout-protocol.md`](evals/fresh-holdout-protocol.md): 튜닝 사례와 분리된 3조건 이미지 생성 검증 절차
+- [`evals/fresh-holdout-manifest.json`](evals/fresh-holdout-manifest.json): PASS 전에 실행 증거 필드를 요구하는 상태·증거 원장
+- [`evals/fresh-holdout-candidate-log.md`](evals/fresh-holdout-candidate-log.md): 보고서 기준일 이후 직접 확인한 후보와 오염 여부 기록
 - [`scripts/validate.py`](scripts/validate.py): 외부 패키지 없이 실행되는 저장소 자동 검사기
 - [`.github/workflows/validate.yml`](.github/workflows/validate.yml): pull request와 `main` 푸시에서 자동 검증을 실행하는 GitHub Actions
 

@@ -1,10 +1,10 @@
 # Reference-Image Fidelity Protocol
 
-Use this protocol only when an attachment controls content, style, layout, a protected region, or a revision decision. It improves prompt and revision quality; it does not guarantee pixel-identical output.
+Use this protocol only when an actual attachment controls content, style, layout, a protected region, or a revision decision. Without an attachment, do not infer image-derived preservation requirements. This protocol structures prompts and revisions; it does not establish model performance, success rate, or pixel-identical output.
 
 ## Evidence Boundary
 
-- **Account-observed pattern / 계정 관찰 패턴:** approved `@xiaoxiaodong01` posts repeatedly put output and preservation requirements before the stylized region in a late reference-photo transformation family. The family also used explicit region divisions, identity preservation, material actions, editorial typography, and targeted exclusions.
+- **Account-observed pattern / 계정 관찰 패턴:** 13 late variants belonging to one `@xiaoxiaodong01` reference-photo transformation family repeatedly put output and preservation requirements before the stylized region. The family also used explicit region divisions, identity preservation, material actions, editorial typography, and targeted exclusions. This narrow evidence must not be generalized from a broad `47/54` count of all wording related to `maintain`.
 - **Internal one-run observation / 내부 1회 관찰:** three non-blind reference-conditioned trials found strong identity preservation and design-family resemblance, while typography hierarchy, whitespace, incidental QR reuse, and structural-layer counts remained the largest gaps. The source posts, legacy scores, artifact hashes, and limitations are recorded in [reference-fidelity-validation-ko.md](reference-fidelity-validation-ko.md). This is not a controlled benchmark or a performance guarantee.
 - **Analyst generalization / 분석자 일반화:** the role map, three-list method, measurable geometry fields, and comparison rubric below convert those observations into reusable decisions. They are not the account owner's official method.
 
@@ -123,7 +123,7 @@ Use this order for attachment-based transformations:
 
 ## 7. Result Comparison and Revision
 
-When the user supplies a generated result plus a reference or target:
+When the user supplies at least two distinct images—a generated result plus a reference or target:
 
 1. score only visible evidence using the optional visual rubric in [quality-check.md](quality-check.md);
 2. list preserved successes separately from failures;
@@ -132,5 +132,7 @@ When the user supplies a generated result plus a reference or target:
 5. keep the original must-keep list and successful blocks unchanged;
 6. preserve user-supplied or measured geometry; label visually estimated geometry as approximate;
 7. do not claim that a prompt revision guarantees the next image.
+
+With fewer than two images, do not calculate or imply a visual-fidelity score. Return `N/A`, explain which comparison image is missing, and provide only evidence-grounded prompt review or attachment-role analysis. For valid comparisons, mark inapplicable criteria `N/A` and renormalize as defined in [quality-check.md](quality-check.md).
 
 The revision prompt should include explicit checks for identity, geometry, typography hierarchy, incidental artifacts, and exact counts. The skill prepares and evaluates prompts; it does not invoke image generation itself.

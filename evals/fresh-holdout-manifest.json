@@ -1,0 +1,53 @@
+{
+  "$schema": "./fresh-holdout-manifest.schema.json",
+  "schema_version": "2.0",
+  "study_id": "img-skill-fresh-holdout-v2",
+  "status": "DRAFT",
+  "overall_result": "NOT_RUN",
+  "separation_from_tuning": {
+    "legacy_tuning_case_ids": [
+      "legacy-tuning-01",
+      "legacy-tuning-02",
+      "legacy-tuning-03",
+      "legacy-tuning-04",
+      "legacy-tuning-05",
+      "legacy-tuning-06",
+      "legacy-tuning-07",
+      "legacy-tuning-08",
+      "legacy-tuning-09",
+      "legacy-tuning-10"
+    ],
+    "holdout_ids_disjoint": true,
+    "disjoint_dimensions": [
+      "prompt",
+      "source_url",
+      "prompt_family",
+      "attachment_sha256"
+    ],
+    "selection_locked_before_evaluation": false,
+    "legacy_fingerprint_review_status": "NOT_REVIEWED",
+    "legacy_fingerprint_reviewed_by": null,
+    "reviewed_at": null
+  },
+  "protocol": {
+    "conditions": ["baseline", "skill", "source"],
+    "same_conditions_required": true,
+    "minimum_repetitions_per_condition": 4,
+    "must_keep_failure_is_gate": true,
+    "scores_kept_separate": true,
+    "acceptance_criteria": {
+      "minimum_blind_evaluators": 2,
+      "skill_vs_baseline_min_delta": {
+        "structural_score": 5,
+        "image_similarity_score": 5
+      },
+      "skill_vs_source_noninferiority_margin": {
+        "structural_score": 5,
+        "image_similarity_score": 5
+      },
+      "must_keep_all_runs_pass": true,
+      "averaging_unit": "all_runs_per_condition"
+    }
+  },
+  "cases": []
+}
